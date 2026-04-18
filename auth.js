@@ -5,42 +5,51 @@ import {
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
-    authDomain: "citas-medicas-dcb1e.firebaseapp.com",
-    projectId: "citas-medicas-dcb1e",
-    storageBucket: "citas-medicas-dcb1e.firebasestorage.app",
-    messagingSenderId: "1070271369395",
-    appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
+  authDomain: "citas-medicas-dcb1e.firebaseapp.com",
+  projectId: "citas-medicas-dcb1e",
+  storageBucket: "citas-medicas-dcb1e.appspot.com", // 🔥 CORREGIDO
+  messagingSenderId: "1070271369395",
+  appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// REGISTRO
+// 🔥 REGISTRO
 window.registrar = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Completa los campos");
+    return;
+  }
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
     alert("Usuario registrado correctamente");
-    window.location.href = "login.html";
+    window.location.href = "index.html"; // login
   } catch (error) {
     alert("Error: " + error.message);
   }
 };
 
-// LOGIN
+// 🔥 LOGIN
 window.login = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Completa los campos");
+    return;
+  }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
     alert("Login exitoso");
-    window.location.href = "ventas.html";
+    window.location.href = "citas.html"; // 🔥 CORREGIDO
   } catch (error) {
     alert("Error: " + error.message);
   }
