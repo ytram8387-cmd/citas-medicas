@@ -1,11 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login</title>
+
+<style>
+body{
+  font-family:'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#4f46e5,#06b6d4);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+.container{
+  background:white;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  width:300px;
+  text-align:center;
+}
+
+h2{
+  color:#4f46e5;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(135deg,#4f46e5,#06b6d4);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  transform:scale(1.03);
+}
+
+a{
+  color:#06b6d4;
+  text-decoration:none;
+}
+
+a:hover{
+  text-decoration:underline;
+}
+
+.error{
+  color:red;
+  font-size:13px;
+}
+</style>
+
 </head>
+
 <body>
 
+<div class="container">
 <h2>Iniciar Sesión</h2>
 
 <input type="email" id="email" placeholder="Correo">
@@ -14,6 +80,10 @@
 <button onclick="login()">Entrar</button>
 
 <p>¿No tienes cuenta? <a href="registro.html">Registrarse</a></p>
+
+<p class="error" id="error"></p>
+
+</div>
 
 <script type="module" src="./auth.js"></script>
 

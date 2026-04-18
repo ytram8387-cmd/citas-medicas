@@ -11,7 +11,6 @@
   --secondary:#06b6d4;
   --danger:#ef4444;
   --success:#22c55e;
-  --bg:#f1f5f9;
   --card:#ffffff;
 }
 
@@ -20,7 +19,6 @@ body{
   background: linear-gradient(135deg, #4f46e5, #06b6d4);
   margin:0;
   padding:20px;
-  color:#333;
 }
 
 .container{
@@ -35,26 +33,29 @@ body{
 h1{
   text-align:center;
   color:var(--primary);
-  margin-bottom:20px;
+}
+
+.logout{
+  float:right;
+  background:#ef4444;
+  color:white;
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 .form-grid{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
   gap:10px;
+  margin-top:15px;
 }
 
 input{
   padding:10px;
   border-radius:8px;
   border:1px solid #ccc;
-  outline:none;
-  transition:.2s;
-}
-
-input:focus{
-  border-color:var(--primary);
-  box-shadow:0 0 5px rgba(79,70,229,.4);
 }
 
 button{
@@ -62,31 +63,24 @@ button{
   border:none;
   border-radius:8px;
   cursor:pointer;
-  font-weight:bold;
-  transition:.2s;
 }
 
 .btn-guardar{
   background:linear-gradient(135deg, var(--primary), var(--secondary));
   color:white;
-}
-
-.btn-guardar:hover{
-  transform:scale(1.03);
+  margin-top:10px;
 }
 
 table{
   width:100%;
   margin-top:20px;
   border-collapse: collapse;
-  overflow:hidden;
-  border-radius:10px;
 }
 
 th{
   background:var(--primary);
   color:white;
-  padding:12px;
+  padding:10px;
 }
 
 td{
@@ -95,37 +89,23 @@ td{
   border-bottom:1px solid #ddd;
 }
 
-tr:hover{
-  background:#f9fafb;
-}
-
 .acciones button{
-  padding:6px 10px;
   margin:2px;
-  border-radius:6px;
+  padding:6px 10px;
   color:white;
 }
 
-.editar{
-  background:var(--secondary);
-}
-
-.eliminar{
-  background:var(--danger);
-}
-
-.footer{
-  text-align:center;
-  margin-top:15px;
-  font-size:14px;
-  color:#555;
-}
+.editar{ background:#06b6d4; }
+.eliminar{ background:#ef4444; }
 </style>
 </head>
 
 <body>
 
 <div class="container">
+
+<button class="logout" onclick="logout()">Cerrar sesión</button>
+
 <h1>🩺 Sistema de Citas Médicas</h1>
 
 <input type="hidden" id="id">
@@ -153,17 +133,44 @@ tr:hover{
 <tbody id="tablaCitas"></tbody>
 </table>
 
-<div class="footer">
-Sistema CRUD | Diseño moderno ✨
 </div>
 
-</div>
+<!-- 🔥 FIREBASE + PROTECCIÓN -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
+  authDomain: "citas-medicas-dcb1e.firebaseapp.com",
+  projectId: "citas-medicas-dcb1e",
+  storageBucket: "citas-medicas-dcb1e.appspot.com",
+  messagingSenderId: "1070271369395",
+  appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// 🔒 PROTEGER PÁGINA
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  }
+});
+
+// 🔴 LOGOUT
+window.logout = async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+};
+</script>
+
+<!-- CRUD LOCAL -->
 <script>
 let citas = JSON.parse(localStorage.getItem('citas')) || [];
 
 function guardarCita(){
-
 let id = document.getElementById('id').value;
 let paciente = document.getElementById('paciente').value.trim();
 let doctor = document.getElementById('doctor').value.trim();
@@ -171,49 +178,29 @@ let fecha = document.getElementById('fecha').value;
 let hora = document.getElementById('hora').value;
 
 if(!paciente || !doctor || !fecha || !hora){
-alert('Completa todos los campos');
+alert('Completa los campos');
 return;
 }
 
 if(id === ''){
-
-let cita = {
-id: Date.now(),
-paciente,
-doctor,
-fecha,
-hora
-};
-
-citas.push(cita);
-
+citas.push({ id: Date.now(), paciente, doctor, fecha, hora });
 }else{
-
 let index = citas.findIndex(c => c.id == id);
-
-if(index === -1){
-alert('Error al editar');
-limpiar();
-return;
-}
-
+if(index === -1) return;
 citas[index] = {...citas[index], paciente, doctor, fecha, hora};
 }
 
 localStorage.setItem('citas', JSON.stringify(citas));
-
 limpiar();
 mostrarCitas();
 }
 
 function mostrarCitas(){
-
 let tabla = document.getElementById('tablaCitas');
 tabla.innerHTML = '';
 
 citas.forEach(cita => {
-
-let fila = `
+tabla.innerHTML += `
 <tr>
 <td>${cita.id}</td>
 <td>${cita.paciente}</td>
@@ -224,17 +211,13 @@ let fila = `
 <button class="editar" onclick="editarCita(${cita.id})">Editar</button>
 <button class="eliminar" onclick="eliminarCita(${cita.id})">Eliminar</button>
 </td>
-</tr>
-`;
-
-tabla.innerHTML += fila;
-
+</tr>`;
 });
 }
 
 function editarCita(id){
 let cita = citas.find(c => c.id == id);
-if(!cita){ alert('No existe'); return; }
+if(!cita) return;
 
 document.getElementById('id').value = cita.id;
 document.getElementById('paciente').value = cita.paciente;
@@ -244,7 +227,7 @@ document.getElementById('hora').value = cita.hora;
 }
 
 function eliminarCita(id){
-if(confirm('¿Eliminar cita?')){
+if(confirm('¿Eliminar?')){
 citas = citas.filter(c => c.id != id);
 localStorage.setItem('citas', JSON.stringify(citas));
 mostrarCitas();
