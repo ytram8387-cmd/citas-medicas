@@ -1,249 +1,118 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Citas Médicas</title>
-
-<style>
-:root{
-  --primary:#4f46e5;
-  --secondary:#06b6d4;
-  --danger:#ef4444;
-  --success:#22c55e;
-  --card:#ffffff;
-}
-
-body{
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #4f46e5, #06b6d4);
-  margin:0;
-  padding:20px;
-}
-
-.container{
-  max-width:950px;
-  margin:auto;
-  background:var(--card);
-  padding:25px;
-  border-radius:15px;
-  box-shadow:0 10px 30px rgba(0,0,0,.2);
-}
-
-h1{
-  text-align:center;
-  color:var(--primary);
-}
-
-.logout{
-  float:right;
-  background:#ef4444;
-  color:white;
-  padding:8px 12px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.form-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  gap:10px;
-  margin-top:15px;
-}
-
-input{
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button{
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.btn-guardar{
-  background:linear-gradient(135deg, var(--primary), var(--secondary));
-  color:white;
-  margin-top:10px;
-}
-
-table{
-  width:100%;
-  margin-top:20px;
-  border-collapse: collapse;
-}
-
-th{
-  background:var(--primary);
-  color:white;
-  padding:10px;
-}
-
-td{
-  padding:10px;
-  text-align:center;
-  border-bottom:1px solid #ddd;
-}
-
-.acciones button{
-  margin:2px;
-  padding:6px 10px;
-  color:white;
-}
-
-.editar{ background:#06b6d4; }
-.eliminar{ background:#ef4444; }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<button class="logout" onclick="logout()">Cerrar sesión</button>
-
-<h1>🩺 Sistema de Citas Médicas</h1>
-
-<input type="hidden" id="id">
-
-<div class="form-grid">
-<input type="text" id="paciente" placeholder="Paciente">
-<input type="text" id="doctor" placeholder="Doctor">
-<input type="date" id="fecha">
-<input type="time" id="hora">
-</div>
-
-<button class="btn-guardar" onclick="guardarCita()">Guardar Cita</button>
-
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Paciente</th>
-<th>Doctor</th>
-<th>Fecha</th>
-<th>Hora</th>
-<th>Acciones</th>
-</tr>
-</thead>
-<tbody id="tablaCitas"></tbody>
-</table>
-
-</div>
-
-<!-- 🔥 FIREBASE + PROTECCIÓN -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
-  authDomain: "citas-medicas-dcb1e.firebaseapp.com",
-  projectId: "citas-medicas-dcb1e",
-  storageBucket: "citas-medicas-dcb1e.appspot.com",
-  messagingSenderId: "1070271369395",
-  appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// 🔒 PROTEGER PÁGINA
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  
+  import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    deleteDoc, 
+    doc, 
+    query, 
+    where 
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
+    authDomain: "citas-medicas-dcb1e.firebaseapp.com",
+    projectId: "citas-medicas-dcb1e",
+    storageBucket: "citas-medicas-dcb1e.appspot.com",
+    messagingSenderId: "1070271369395",
+    appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  let usuarioActual = null;
+  
+  // 🔒 PROTEGER
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+    } else {
+      usuarioActual = user;
+      cargarCitas();
+    }
+  });
+  
+  // 🔴 LOGOUT
+  window.logout = async () => {
+    await signOut(auth);
     window.location.href = "index.html";
+  };
+  
+  // 🔥 GUARDAR EN FIREBASE
+  window.guardarCita = async () => {
+  
+  let paciente = document.getElementById('paciente').value.trim();
+  let doctor = document.getElementById('doctor').value.trim();
+  let fecha = document.getElementById('fecha').value;
+  let hora = document.getElementById('hora').value;
+  
+  if(!paciente || !doctor || !fecha || !hora){
+  alert('Completa los campos');
+  return;
   }
-});
-
-// 🔴 LOGOUT
-window.logout = async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-};
-</script>
-
-<!-- CRUD LOCAL -->
-<script>
-let citas = JSON.parse(localStorage.getItem('citas')) || [];
-
-function guardarCita(){
-let id = document.getElementById('id').value;
-let paciente = document.getElementById('paciente').value.trim();
-let doctor = document.getElementById('doctor').value.trim();
-let fecha = document.getElementById('fecha').value;
-let hora = document.getElementById('hora').value;
-
-if(!paciente || !doctor || !fecha || !hora){
-alert('Completa los campos');
-return;
-}
-
-if(id === ''){
-citas.push({ id: Date.now(), paciente, doctor, fecha, hora });
-}else{
-let index = citas.findIndex(c => c.id == id);
-if(index === -1) return;
-citas[index] = {...citas[index], paciente, doctor, fecha, hora};
-}
-
-localStorage.setItem('citas', JSON.stringify(citas));
-limpiar();
-mostrarCitas();
-}
-
-function mostrarCitas(){
-let tabla = document.getElementById('tablaCitas');
-tabla.innerHTML = '';
-
-citas.forEach(cita => {
-tabla.innerHTML += `
-<tr>
-<td>${cita.id}</td>
-<td>${cita.paciente}</td>
-<td>${cita.doctor}</td>
-<td>${cita.fecha}</td>
-<td>${cita.hora}</td>
-<td class="acciones">
-<button class="editar" onclick="editarCita(${cita.id})">Editar</button>
-<button class="eliminar" onclick="eliminarCita(${cita.id})">Eliminar</button>
-</td>
-</tr>`;
-});
-}
-
-function editarCita(id){
-let cita = citas.find(c => c.id == id);
-if(!cita) return;
-
-document.getElementById('id').value = cita.id;
-document.getElementById('paciente').value = cita.paciente;
-document.getElementById('doctor').value = cita.doctor;
-document.getElementById('fecha').value = cita.fecha;
-document.getElementById('hora').value = cita.hora;
-}
-
-function eliminarCita(id){
-if(confirm('¿Eliminar?')){
-citas = citas.filter(c => c.id != id);
-localStorage.setItem('citas', JSON.stringify(citas));
-mostrarCitas();
-}
-}
-
-function limpiar(){
-document.getElementById('id').value = '';
-document.getElementById('paciente').value = '';
-document.getElementById('doctor').value = '';
-document.getElementById('fecha').value = '';
-document.getElementById('hora').value = '';
-}
-
-mostrarCitas();
-</script>
-
-</body>
-</html>
+  
+  await addDoc(collection(db, "citas"), {
+    paciente,
+    doctor,
+    fecha,
+    hora,
+    userId: usuarioActual.uid
+  });
+  
+  limpiar();
+  cargarCitas();
+  };
+  
+  // 🔥 MOSTRAR DESDE FIREBASE
+  async function cargarCitas(){
+  
+  let tabla = document.getElementById('tablaCitas');
+  tabla.innerHTML = '';
+  
+  const q = query(
+    collection(db, "citas"),
+    where("userId", "==", usuarioActual.uid)
+  );
+  
+  const querySnapshot = await getDocs(q);
+  
+  querySnapshot.forEach((docSnap) => {
+    const cita = docSnap.data();
+  
+    tabla.innerHTML += `
+    <tr>
+      <td>${docSnap.id}</td>
+      <td>${cita.paciente}</td>
+      <td>${cita.doctor}</td>
+      <td>${cita.fecha}</td>
+      <td>${cita.hora}</td>
+      <td>
+        <button onclick="eliminarCita('${docSnap.id}')">Eliminar</button>
+      </td>
+    </tr>`;
+  });
+  }
+  
+  // 🔥 ELIMINAR
+  window.eliminarCita = async (id) => {
+    await deleteDoc(doc(db, "citas", id));
+    cargarCitas();
+  };
+  
+  function limpiar(){
+  document.getElementById('paciente').value = '';
+  document.getElementById('doctor').value = '';
+  document.getElementById('fecha').value = '';
+  document.getElementById('hora').value = '';
+  }
+  </script>
