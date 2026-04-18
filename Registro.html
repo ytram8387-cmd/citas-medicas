@@ -1,57 +1,21 @@
-// Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+</head>
+<body>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAo2vwUP_K_l4fTyGH4ThWCbMuhpQZfFvA",
-  authDomain: "citas-medicas-dcb1e.firebaseapp.com",
-  projectId: "citas-medicas-dcb1e",
-  storageBucket: "citas-medicas-dcb1e.appspot.com",
-  messagingSenderId: "1070271369395",
-  appId: "1:1070271369395:web:6da3cdb1a3a1a73ac4e0c6"
-};
+<h2>Iniciar Sesión</h2>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+<input type="email" id="email" placeholder="Correo">
+<input type="password" id="password" placeholder="Contraseña">
 
-// 🔥 REGISTRAR (IMPORTANTE window.)
-window.registrar = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+<button onclick="login()">Entrar</button>
 
-  if (!email || !password) {
-    alert("Completa los campos");
-    return;
-  }
+<p>¿No tienes cuenta? <a href="registro.html">Registrarse</a></p>
 
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert("Usuario registrado");
-    window.location.href = "index.html"; // login
-  } catch (error) {
-    alert(error.message);
-  }
-};
+<script type="module" src="./auth.js"></script>
 
-// 🔥 LOGIN
-window.login = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    alert("Completa los campos");
-    return;
-  }
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("Bienvenido");
-    window.location.href = "citas.html";
-  } catch (error) {
-    alert(error.message);
-  }
-};
+</body>
+</html>
