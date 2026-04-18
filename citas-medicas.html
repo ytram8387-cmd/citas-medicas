@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRUD Citas Médicas</title>
+
+<style>
+body{
+font-family: Arial, Helvetica, sans-serif;
+background:#eef2f7;
+padding:20px;
+}
+
+h1{
+text-align:center;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+input, button{
+padding:10px;
+margin:5px 0;
+width:100%;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+background:#28a745;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#1e7e34;
+}
+
+table{
+width:100%;
+border-collapse: collapse;
+margin-top:20px;
+}
+
+th, td{
+padding:10px;
+border-bottom:1px solid #ddd;
+text-align:center;
+}
+
+.acciones button{
+width:auto;
+padding:5px 10px;
+margin:2px;
+}
+
+.eliminar{
+background:#dc3545;
+}
+
+.editar{
+background:#007BFF;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<h1>CRUD de Citas Médicas</h1>
+
+<input type="hidden" id="id">
+
+<label>Paciente</label>
+<input type="text" id="paciente">
+
+<label>Doctor</label>
+<input type="text" id="doctor">
+
+<label>Fecha</label>
+<input type="date" id="fecha">
+
+<label>Hora</label>
+<input type="time" id="hora">
+
+<button onclick="guardarCita()">Guardar Cita</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Paciente</th>
+<th>Doctor</th>
+<th>Fecha</th>
+<th>Hora</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaCitas"></tbody>
+</table>
+
+</div>
+
+<script>
+let citas = JSON.parse(localStorage.getItem('citas')) || [];
+
+function guardarCita(){
+
+let id = document.getElementById('id').value;
+let paciente = document.getElementById('paciente').value;
+let doctor = document.getElementById('doctor').value;
+let fecha = document.getElementById('fecha').value;
+let hora = document.getElementById('hora').value;
+
+if(paciente === '' || doctor === '' || fecha === '' || hora === ''){
+alert('Completa todos los campos');
+return;
+}
+
+if(id === ''){
+
+let cita = {
+id: Date.now(),
+paciente,
+doctor,
+fecha,
+hora
+};
+
+citas.push(cita);
+
+}else{
+
+let index = citas.findIndex(c => c.id == id);
+
+citas[index].paciente = paciente;
+citas[index].doctor = doctor;
+citas[index].fecha = fecha;
+citas[index].hora = hora;
+
+}
+
+localStorage.setItem('citas', JSON.stringify(citas));
+
+limpiar();
+mostrarCitas();
+}
+
+function mostrarCitas(){
+
+let tabla = document.getElementById('tablaCitas');
+tabla.innerHTML = '';
+
+citas.forEach(cita => {
+
+let fila = `
+<tr>
+<td>${cita.id}</td>
+<td>${cita.paciente}</td>
+<td>${cita.doctor}</td>
+<td>${cita.fecha}</td>
+<td>${cita.hora}</td>
+<td class="acciones">
+<button class="editar" onclick="editarCita(${cita.id})">Editar</button>
+<button class="eliminar" onclick="eliminarCita(${cita.id})">Eliminar</button>
+</td>
+</tr>
+`;
+
+tabla.innerHTML += fila;
+
+});
+
+}
+
+function editarCita(id){
+
+let cita = citas.find(c => c.id == id);
+
+document.getElementById('id').value = cita.id;
+document.getElementById('paciente').value = cita.paciente;
+document.getElementById('doctor').value = cita.doctor;
+document.getElementById('fecha').value = cita.fecha;
+document.getElementById('hora').value = cita.hora;
+
+}
+
+function eliminarCita(id){
+
+if(confirm('¿Eliminar cita?')){
+
+citas = citas.filter(c => c.id != id);
+
+localStorage.setItem('citas', JSON.stringify(citas));
+
+mostrarCitas();
+
+}
+
+}
+
+function limpiar(){
+
+document.getElementById('id').value = '';
+document.getElementById('paciente').value = '';
+document.getElementById('doctor').value = '';
+document.getElementById('fecha').value = '';
+document.getElementById('hora').value = '';
+
+}
+
+mostrarCitas();
+</script>
+
+</body>
+</html>
