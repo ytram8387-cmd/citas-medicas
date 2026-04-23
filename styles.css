@@ -1,29 +1,127 @@
+/* RESET */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* FONDO */
 body{
-    font-family: Arial;
-    background:#f4f6f9;
-    padding:20px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
+/* CONTENEDOR PRINCIPAL */
 .container{
-    max-width:800px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
+    width:100%;
+    max-width:900px;
+    background:#ffffff;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
-input, button{
-    padding:10px;
-    margin:5px;
+/* TITULO */
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#333;
 }
 
+/* FORMULARIO */
+.form{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap:10px;
+    margin-bottom:20px;
+}
+
+input{
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    transition:0.3s;
+}
+
+input:focus{
+    border-color:#4facfe;
+    outline:none;
+    box-shadow:0 0 5px rgba(79,172,254,0.5);
+}
+
+/* BOTÓN */
 button{
-    cursor:pointer;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#4facfe;
+    color:white;
+    font-weight:bold;
+    transition:0.3s;
 }
 
-.cita{
-    background:#e9ecef;
-    padding:10px;
+button:hover{
+    background:#3a8ee6;
+    transform:scale(1.03);
+}
+
+/* LISTA */
+#listaCitas{
     margin-top:10px;
-    border-radius:5px;
+}
+
+/* TARJETAS */
+.cita{
+    background:#f8f9fa;
+    border-left:5px solid #4facfe;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    animation:fadeIn 0.3s ease;
+}
+
+.cita p{
+    margin:5px 0;
+    color:#333;
+}
+
+/* BOTONES DENTRO */
+.cita button{
+    margin-top:10px;
+    margin-right:5px;
+    padding:8px 12px;
+    font-size:14px;
+}
+
+/* BOTÓN ELIMINAR */
+.cita button:last-child{
+    background:#ff4d4d;
+}
+
+.cita button:last-child:hover{
+    background:#e60000;
+}
+
+/* ANIMACIÓN */
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+    .container{
+        padding:20px;
+    }
 }
